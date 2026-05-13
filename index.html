@@ -7,13 +7,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #3182ce;
-            --secondary: #2d3748;
-            --accent: #e53e3e;
-            --success: #38a169;
-            --bg: #1a202c;
-            --panel-bg: #2d3748;
-            --text: #f7fafc;
+            --primary: #3182ce; --secondary: #2d3748;
+            --accent: #e53e3e; --success: #38a169;
+            --bg: #1a202c; --panel-bg: #2d3748; --text: #f7fafc;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -57,6 +53,8 @@
         .weapon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px; }
         .weapon-btn { padding: 15px; font-size: 15px; font-weight: bold; border-radius: 8px; border: 2px solid #4a5568; background: var(--panel-bg); color: white; cursor: pointer; transition: 0.2s; }
         .weapon-btn.selected { border-color: #63b3ed; background: #2b6cb0; box-shadow: 0 0 15px rgba(99,179,237,0.5); }
+        
+        kbd { background: #4a5568; padding: 2px 6px; border-radius: 4px; border-bottom: 2px solid #1a202c; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -78,13 +76,16 @@
         
         <div id="home" class="section active">
             <h1>표적 치료 시뮬레이션 아케이드</h1>
-            <p style="color: #cbd5e0;">컨트롤과 순발력, 메커니즘 판단력을 시험하는 4가지 실전 디펜스 모드가 준비되어 있습니다.</p>
+            <p style="color: #cbd5e0;">실제 분자생물학적 기전을 반영한 4가지 고도화된 실전 디펜스 모드가 준비되어 있습니다.</p>
             <div style="background: var(--panel-bg); padding: 20px; border-radius: 8px; margin-top:20px; border-left: 4px solid #63b3ed;">
-                <h3 style="margin-top:0; color:#63b3ed;">🎮 공통 조작 가이드 및 페널티 규칙</h3>
+                <h3 style="margin-top:0; color:#63b3ed;">🎮 핵심 메커니즘 조작 가이드</h3>
                 <ul style="line-height: 1.8; color:#e2e8f0;">
-                    <li><b>siRNA 스나이퍼:</b> <kbd>←</kbd> <kbd>→</kbd> 방향키로 이동, <kbd>A</kbd> <kbd>U</kbd> <kbd>G</kbd> <kbd>C</kbd> 키를 직접 눌러 상보적 염기 발사. (오조준 시 HP -10)</li>
-                    <li><b>ASO 에디터:</b> 타겟 존에 붉은 돌연변이가 올 때만 <kbd>Spacebar</kbd> 입력. (정상 엑손 건드릴 시 HP -10)</li>
-                    <li><b>효소 도킹:</b> 날아오는 기질을 막기 위해 알맞은 포켓 저해제 투척. (기질 침투 시 HP -10)</li>
+                    <li><b>siRNA 스나이퍼:</b> <kbd>←</kbd> <kbd>→</kbd> 이동, <kbd>A</kbd> <kbd>U</kbd> <kbd>G</kbd> <kbd>C</kbd> 직접 타이핑 요격. (오조준 시 HP -10)</li>
+                    <li><b>ASO 멀티트랙:</b> <kbd>↑</kbd> <kbd>↓</kbd> 키로 타겟 차선 변경 후 붉은 변이가 올 때만 <kbd>Space</kbd> 입력. (오작동 시 HP -10)</li>
+                    <li><b>효소 정밀 도킹:</b> 효소 상태를 확인하고 알맞은 약물을 투여하세요. (틀린 약물 투여 시 HP -10)
+                        <br>- 녹색 효소 (활성 부위 타겟) 👉 <kbd>Z</kbd> 키 (경쟁적 저해제)
+                        <br>- 보라색 효소 (올로스테릭 타겟) 👉 <kbd>X</kbd> 키 (비경쟁적 저해제)
+                    </li>
                     <li><b>제한 시간:</b> 각 모드는 <b>60초</b>간 진행되며 체력이 0이 되면 작전 실패입니다.</li>
                 </ul>
             </div>
@@ -94,7 +95,7 @@
             <h1>🧬 RNA 타격 부대</h1>
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="showTab('rna', 'sirna')">🎯 siRNA 스나이퍼</button>
-                <button class="tab-btn" onclick="showTab('rna', 'aso')">✂️ ASO 에디터</button>
+                <button class="tab-btn" onclick="showTab('rna', 'aso')">✂️ ASO 에디터 (2차선)</button>
             </div>
             
             <div id="sirna" class="tab-content active">
@@ -105,7 +106,7 @@
                 <div style="position:relative; width:700px; margin:0 auto;">
                     <div id="sirnaOverlay" class="start-overlay">
                         <h2 style="color:white; margin-bottom:10px;">TTR 변이 RNA 요격 작전</h2>
-                        <p style="color:#a0aec0; margin-bottom:20px;">[←] [→] 좌우 이동 | [A] [U] [G] [C] 직접 타이핑 발사</p>
+                        <p style="color:#a0aec0; margin-bottom:20px;">[←] [→] 이동 | [A] [U] [G] [C] 직접 타이핑 발사</p>
                         <button class="action-btn" onclick="startMiniGame('sirna')">▶️ 작전 시작</button>
                     </div>
                     <canvas id="sirnaCanvas" width="700" height="350"></canvas>
@@ -118,12 +119,12 @@
                     <div class="stat-box">❤️ 코어 체력: <div class="hp-bar-container"><div id="asoHpBar" class="hp-bar-fill"></div></div></div>
                 </div>
                 <div style="position:relative; width:700px; margin:0 auto;">
-                    <div id="asoOverlay" class="start-overlay" style="height:200px;">
-                        <h2 style="color:white; margin-bottom:10px;">SMN2 스플라이싱 실시간 수선</h2>
-                        <p style="color:#a0aec0; margin-bottom:20px;">붉은색 돌연변이 엑손이 중앙에 올 때만 [Spacebar] 쾌속 입력</p>
+                    <div id="asoOverlay" class="start-overlay" style="height:220px;">
+                        <h2 style="color:white; margin-bottom:10px;">SMN2 스플라이싱 2차선 수선</h2>
+                        <p style="color:#a0aec0; margin-bottom:20px;">[↑] [↓] 방향키로 차선 변경 후 변이 엑손 도달 시 [Space] 타격</p>
                         <button class="action-btn" onclick="startMiniGame('aso')">▶️ 작전 시작</button>
                     </div>
-                    <canvas id="asoCanvas" width="700" height="200"></canvas>
+                    <canvas id="asoCanvas" width="700" height="220"></canvas>
                 </div>
             </div>
         </div>
@@ -131,7 +132,7 @@
         <div id="enzyme" class="section">
             <h1>🧪 효소 제어 부대</h1>
             <div class="tab-buttons">
-                <button class="tab-btn active" onclick="showTab('enzyme', 'docking')">🧩 실시간 효소 도킹</button>
+                <button class="tab-btn active" onclick="showTab('enzyme', 'docking')">🧩 실시간 기작 도킹</button>
                 <button class="tab-btn" onclick="showTab('enzyme', 'theory')">📊 저해제 동역학 분석</button>
             </div>
             
@@ -142,15 +143,15 @@
                 </div>
                 <div style="position:relative; width:700px; margin:0 auto;">
                     <div id="ezOverlay" class="start-overlay">
-                        <h2 style="color:white; margin-bottom:10px;">과활성 효소 포켓 봉쇄</h2>
-                        <p style="color:#a0aec0; margin-bottom:20px;">기질 침투 전 하단의 저해제 버튼을 눌러 입구를 굳히세요</p>
+                        <h2 style="color:white; margin-bottom:10px;">상태 맞춤형 포켓 봉쇄 작전</h2>
+                        <p style="color:#a0aec0; margin-bottom:20px;">효소의 변이 상태를 파악하고 알맞은 기전의 약물을 발사하세요</p>
                         <button class="action-btn" onclick="startMiniGame('ez')">▶️ 작전 시작</button>
                     </div>
                     <canvas id="enzymeCanvas" width="700" height="350"></canvas>
                 </div>
                 <div style="display: flex; justify-content: center; gap: 20px; margin-top: 15px;">
-                    <button class="action-btn" style="background: #dd6b20;" onclick="fireInhibitor('comp')">🔑 경쟁적 저해제 (활성 부위 도킹)</button>
-                    <button class="action-btn" style="background: #805ad5;" onclick="fireInhibitor('noncomp')">🔨 비경쟁적 저해제 (구조 찌그러뜨리기)</button>
+                    <button class="action-btn" style="background: #dd6b20; width:280px;" onclick="fireInhibitor('comp')">🔑 경쟁적 저해제 [Z]<br><span style="font-size:12px;">(타겟: 정상 개방 활성 부위)</span></button>
+                    <button class="action-btn" style="background: #805ad5; width:280px;" onclick="fireInhibitor('noncomp')">🔨 비경쟁적 저해제 [X]<br><span style="font-size:12px;">(타겟: 왜곡 변이 올로스테릭 부위)</span></button>
                 </div>
             </div>
 
@@ -236,8 +237,8 @@
             else games[gName].timer = 60;
 
             if(gName==='sirna') { bossLetters=[]; lasers=[]; playerX=350; bossX=350; bossSpeed=2.5; }
-            if(gName==='aso')   { conveyorItems=[]; }
-            if(gName==='ez')    { subBalls=[]; ezBlockedTimer=0; }
+            if(gName==='aso')   { conveyorItems=[]; asoTrack=0; }
+            if(gName==='ez')    { subBalls=[]; ezBlockedTimer=0; ezState='NORMAL'; ezSwitchTimer=0; }
             if(gName==='war')   { enemies=[]; }
 
             if(games[gName].interval) clearInterval(games[gName].interval);
@@ -290,19 +291,15 @@
         }
 
         // ==========================================
-        // 🎯 1. siRNA 스나이퍼 (공격 속도 완화 버전)
+        // 🎯 1. siRNA 스나이퍼
         // ==========================================
         const sirnaCtx = document.getElementById('sirnaCanvas').getContext('2d');
-        let playerX = 350;
-        let bossX = 350, bossSpeed = 2.5; // 패치: 보스 이동 속도 감소 (4 -> 2.5)
-        let bossLetters = [];
-        let lasers = [];
-        let sSpawnTimer = 0;
-        let pKeys = {};
+        let playerX = 350, bossX = 350, bossSpeed = 2.5;
+        let bossLetters = [], lasers = [], sSpawnTimer = 0, pKeys = {};
 
         window.addEventListener('keydown', e => {
             pKeys[e.code] = true;
-            if(['ArrowLeft','ArrowRight','Space'].includes(e.code) && currentTab !== 'home') e.preventDefault();
+            if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code) && currentTab !== 'home') e.preventDefault();
             if(!games.sirna.active) return;
             
             const keyChar = e.key.toUpperCase();
@@ -314,16 +311,13 @@
 
         function sirnaLoop() {
             sirnaCtx.clearRect(0, 0, 700, 350);
-            
             if(games.sirna.active) {
                 if(pKeys['ArrowLeft']) playerX = Math.max(30, playerX - 7);
                 if(pKeys['ArrowRight']) playerX = Math.min(670, playerX + 7);
             }
-
             if(games.sirna.errorFlash > 0) {
                 sirnaCtx.fillStyle = `rgba(229, 62, 62, ${games.sirna.errorFlash/20})`;
-                sirnaCtx.fillRect(0,0,700,350);
-                games.sirna.errorFlash--;
+                sirnaCtx.fillRect(0,0,700,350); games.sirna.errorFlash--;
             }
 
             if(games.sirna.active) {
@@ -335,9 +329,8 @@
                 sirnaCtx.fillStyle = "white"; sirnaCtx.font = "bold 12px Segoe UI"; sirnaCtx.fillText("BOSS", bossX-15, 44);
 
                 sSpawnTimer++;
-                if(sSpawnTimer > 65) { // 패치: 스폰 주기 완화 (45 -> 65 프레임)
+                if(sSpawnTimer > 65) {
                     const bases = ['A','U','G','C'];
-                    // 패치: 하강 속도 대폭 감소 (0.8 ~ 1.5)
                     bossLetters.push({x: bossX + (Math.random()*40-20), y: 65, char: bases[Math.floor(Math.random()*4)], speed: 0.8 + Math.random()*0.7});
                     sSpawnTimer = 0;
                 }
@@ -346,80 +339,100 @@
             for(let i = bossLetters.length-1; i >= 0; i--) {
                 let l = bossLetters[i];
                 if(games.sirna.active) l.y += l.speed;
-                
-                sirnaCtx.fillStyle = "#2b6cb0";
-                sirnaCtx.beginPath(); sirnaCtx.arc(l.x, l.y, 18, 0, Math.PI*2); sirnaCtx.fill();
+                sirnaCtx.fillStyle = "#2b6cb0"; sirnaCtx.beginPath(); sirnaCtx.arc(l.x, l.y, 18, 0, Math.PI*2); sirnaCtx.fill();
                 sirnaCtx.fillStyle = "white"; sirnaCtx.font = "bold 16px Segoe UI"; sirnaCtx.fillText(l.char, l.x-6, l.y+6);
 
                 if(l.y > 330 && games.sirna.active) {
-                    bossLetters.splice(i, 1);
-                    triggerDamage('sirna', 10);
-                    addScore(-5);
+                    bossLetters.splice(i, 1); triggerDamage('sirna', 10); addScore(-5);
                 }
             }
 
             for(let i = lasers.length-1; i >= 0; i--) {
-                let laser = lasers[i];
-                laser.y -= laser.speed;
-                
-                sirnaCtx.fillStyle = "#48bb78";
-                sirnaCtx.beginPath(); sirnaCtx.arc(laser.x, laser.y, 6, 0, Math.PI*2); sirnaCtx.fill();
+                let laser = lasers[i]; laser.y -= laser.speed;
+                sirnaCtx.fillStyle = "#48bb78"; sirnaCtx.beginPath(); sirnaCtx.arc(laser.x, laser.y, 6, 0, Math.PI*2); sirnaCtx.fill();
                 sirnaCtx.fillStyle = "white"; sirnaCtx.font = "bold 12px Segoe UI"; sirnaCtx.fillText(laser.comp, laser.x-4, laser.y+15);
 
                 for(let j = bossLetters.length-1; j >= 0; j--) {
                     let l = bossLetters[j];
                     if(Math.hypot(laser.x - l.x, laser.y - l.y) < 22) {
-                        if(laser.comp === compMap[l.char]) {
-                            bossLetters.splice(j, 1);
-                            addScore(15);
-                        } else {
-                            triggerDamage('sirna', 10);
-                            addScore(-10);
-                        }
-                        lasers.splice(i, 1);
-                        break;
+                        if(laser.comp === compMap[l.char]) { bossLetters.splice(j, 1); addScore(15); } 
+                        else { triggerDamage('sirna', 10); addScore(-10); }
+                        lasers.splice(i, 1); break;
                     }
                 }
                 if(laser && laser.y < 0) lasers.splice(i, 1);
             }
 
-            sirnaCtx.fillStyle = "#63b3ed";
-            sirnaCtx.beginPath();
-            sirnaCtx.moveTo(playerX, 310); sirnaCtx.lineTo(playerX-25, 340); sirnaCtx.lineTo(playerX+25, 340);
-            sirnaCtx.fill();
-
+            sirnaCtx.fillStyle = "#63b3ed"; sirnaCtx.beginPath();
+            sirnaCtx.moveTo(playerX, 310); sirnaCtx.lineTo(playerX-25, 340); sirnaCtx.lineTo(playerX+25, 340); sirnaCtx.fill();
             requestAnimationFrame(sirnaLoop);
         }
         sirnaLoop();
 
         // ==========================================
-        // ✂️ 2. ASO 에디터 (쾌속 컨베이어 버전)
+        // ✂️ 2. ASO 에디터 (멀티트랙 2차선 개조판)
         // ==========================================
         const asoCtx = document.getElementById('asoCanvas').getContext('2d');
         let conveyorItems = [];
         let asoTimer = 0;
+        let asoTrack = 0; // 0: Top 트랙, 1: Bottom 트랙
+
+        // 위/아래 차선 변경 이벤트
+        window.addEventListener('keydown', e => {
+            if(!games.aso.active) return;
+            if(e.code === 'ArrowUp') asoTrack = 0;
+            if(e.code === 'ArrowDown') asoTrack = 1;
+            
+            if(e.code === 'Space') {
+                let hitTarget = false;
+                // 현재 스캐너가 위치한 트랙(asoTrack)의 타겟 존만 검사
+                for(let i = conveyorItems.length-1; i >= 0; i--) {
+                    let item = conveyorItems[i];
+                    if(item.track === asoTrack && item.x > 250 && item.x < 370) {
+                        hitTarget = true;
+                        if(item.isError) {
+                            conveyorItems.splice(i, 1); addScore(30);
+                        } else { // 정상 엑손 타격
+                            triggerDamage('aso', 15); addScore(-15);
+                        }
+                        break;
+                    }
+                }
+                if(!hitTarget) triggerDamage('aso', 5); // 헛손질
+            }
+        });
 
         function asoLoop() {
-            asoCtx.clearRect(0, 0, 700, 200);
-            
+            asoCtx.clearRect(0, 0, 700, 220);
             if(games.aso.errorFlash > 0) {
                 asoCtx.fillStyle = `rgba(229, 62, 62, ${games.aso.errorFlash/20})`;
-                asoCtx.fillRect(0,0,700,200);
-                games.aso.errorFlash--;
+                asoCtx.fillRect(0,0,700,220); games.aso.errorFlash--;
             }
 
+            // 2개의 컨베이어 벨트 라인 렌더링
+            asoCtx.strokeStyle = "#4a5568"; asoCtx.lineWidth = 2;
+            asoCtx.beginPath(); asoCtx.moveTo(0, 75); asoCtx.lineTo(700, 75); asoCtx.stroke();
+            asoCtx.beginPath(); asoCtx.moveTo(0, 165); asoCtx.lineTo(700, 165); asoCtx.stroke();
+            
+            // 트랙 표시 라벨
+            asoCtx.fillStyle = "#718096"; asoCtx.font = "bold 11px Segoe UI";
+            asoCtx.fillText("TRACK 1 [↑]", 10, 25);
+            asoCtx.fillText("TRACK 2 [↓]", 10, 115);
+
+            // 현재 위치한 트랙에 스캐너 타겟 존 표시
+            let targetY = asoTrack === 0 ? 30 : 120;
             asoCtx.strokeStyle = "#ecc94b"; asoCtx.lineWidth = 3;
-            asoCtx.strokeRect(310, 40, 80, 120);
-            asoCtx.fillStyle = "rgba(236, 201, 75, 0.15)"; asoCtx.fillRect(310, 40, 80, 120);
+            asoCtx.strokeRect(310, targetY, 80, 50);
+            asoCtx.fillStyle = "rgba(236, 201, 75, 0.2)"; asoCtx.fillRect(310, targetY, 80, 50);
 
             if(games.aso.active) {
                 asoTimer++;
-                if(asoTimer > 45) { // 패치: 속도가 빨라진 만큼 스폰 간격 최적화 (80 -> 45)
+                if(asoTimer > 40) { // 양쪽 트랙에 랜덤 소환
                     const isErr = Math.random() < 0.45;
+                    const randTrack = Math.random() < 0.5 ? 0 : 1;
                     conveyorItems.push({
-                        x: 0, y: 80, 
-                        speed: 6.0, // 패치: 엑손 이동 속도 대폭 상향 (3.5 -> 6.0)
-                        isError: isErr, text: isErr ? "Mutant 7b" : "Normal Exon"
+                        x: 0, y: randTrack === 0 ? 35 : 125, track: randTrack,
+                        speed: 5.5, isError: isErr, text: isErr ? "Mutant 7b" : "Normal Exon"
                     });
                     asoTimer = 0;
                 }
@@ -430,70 +443,73 @@
                 if(games.aso.active) item.x += item.speed;
 
                 asoCtx.fillStyle = item.isError ? "#e53e3e" : "#3182ce";
-                asoCtx.fillRect(item.x, item.y, 80, 40);
-                asoCtx.fillStyle = "white"; asoCtx.font = "bold 12px Segoe UI"; asoCtx.fillText(item.text, item.x+6, item.y+25);
+                asoCtx.fillRect(item.x, item.y, 80, 35);
+                asoCtx.fillStyle = "white"; asoCtx.font = "bold 12px Segoe UI"; asoCtx.fillText(item.text, item.x+6, item.y+22);
 
                 if(item.x > 700) {
-                    if(item.isError && games.aso.active) {
-                        triggerDamage('aso', 15);
-                        addScore(-10);
-                    }
+                    if(item.isError && games.aso.active) { triggerDamage('aso', 15); addScore(-10); }
                     conveyorItems.splice(i, 1);
                 }
             }
             requestAnimationFrame(asoLoop);
         }
-        
-        window.addEventListener('keydown', e => {
-            if(e.code === 'Space' && games.aso.active) {
-                let hitTarget = false;
-                for(let i = conveyorItems.length-1; i >= 0; i--) {
-                    let item = conveyorItems[i];
-                    if(item.x > 250 && item.x < 370) {
-                        hitTarget = true;
-                        if(item.isError) {
-                            conveyorItems.splice(i, 1);
-                            addScore(30);
-                        } else {
-                            triggerDamage('aso', 15);
-                            addScore(-15);
-                        }
-                        break;
-                    }
-                }
-                if(!hitTarget) triggerDamage('aso', 5);
-            }
-        });
         asoLoop();
 
         // ==========================================
-        // 🧩 3. 실시간 효소 도킹
+        // 🧩 3. 실시간 기작 맞춤형 효소 도킹
         // ==========================================
         const ezCtx = document.getElementById('enzymeCanvas').getContext('2d');
-        let subBalls = [];
-        let ezTimer = 0;
-        let ezBlockedTimer = 0;
+        let subBalls = [], ezTimer = 0, ezBlockedTimer = 0;
+        let ezState = 'NORMAL'; // 'NORMAL' (녹색, 활성부위 타겟) vs 'MUTANT' (보라색, 올로스테릭 타겟)
+        let ezSwitchTimer = 0;
+
+        // 단축키 연동 (Z: 경쟁적, X: 비경쟁적)
+        window.addEventListener('keydown', e => {
+            if(!games.ez.active) return;
+            if(e.code === 'KeyZ') fireInhibitor('comp');
+            if(e.code === 'KeyX') fireInhibitor('noncomp');
+        });
 
         function ezLoop() {
             ezCtx.clearRect(0, 0, 700, 350);
-            
             if(games.ez.errorFlash > 0) {
                 ezCtx.fillStyle = `rgba(229, 62, 62, ${games.ez.errorFlash/20})`;
-                ezCtx.fillRect(0,0,700,350);
-                games.ez.errorFlash--;
+                ezCtx.fillRect(0,0,700,350); games.ez.errorFlash--;
             }
 
-            ezCtx.fillStyle = ezBlockedTimer > 0 ? "#718096" : "#38a169";
-            ezCtx.beginPath(); ezCtx.arc(350, 175, 50, 0, Math.PI*2); ezCtx.fill();
+            if(games.ez.active) {
+                // 일정 시간마다 효소 상태 스위치
+                ezSwitchTimer++;
+                if(ezSwitchTimer > 180) { // 약 3초마다 변경
+                    ezState = ezState === 'NORMAL' ? 'MUTANT' : 'NORMAL';
+                    ezSwitchTimer = 0;
+                }
+            }
+
+            // 효소 본체 렌더링 (상태에 따라 색상과 타겟팅 효과 변경)
+            ezCtx.fillStyle = ezBlockedTimer > 0 ? "#718096" : (ezState === 'NORMAL' ? "#38a169" : "#805ad5");
+            ezCtx.beginPath(); ezCtx.arc(350, 175, 55, 0, Math.PI*2); ezCtx.fill();
+            
             if(ezBlockedTimer > 0) {
                 ezCtx.fillStyle = "white"; ezCtx.font = "bold 14px Segoe UI"; ezCtx.fillText("LOCKED", 323, 180);
                 ezBlockedTimer--;
+            } else {
+                // 타겟팅 인디케이터 렌더링
+                if(ezState === 'NORMAL') {
+                    // 활성 부위(입구 중앙) 반짝임
+                    ezCtx.fillStyle = "#63b3ed"; ezCtx.beginPath(); ezCtx.arc(380, 175, 15, 0, Math.PI*2); ezCtx.fill();
+                    ezCtx.fillStyle = "white"; ezCtx.font = "bold 16px Segoe UI"; ezCtx.fillText("타겟: 활성 부위 [Z]", 280, 110);
+                } else {
+                    // 올로스테릭 부위(하단 옆구리) 반짝임
+                    ezCtx.fillStyle = "#ecc94b"; ezCtx.beginPath(); ezCtx.arc(330, 225, 18, 0, Math.PI*2); ezCtx.fill();
+                    ezCtx.fillStyle = "#ecc94b"; ezCtx.font = "bold 16px Segoe UI"; ezCtx.fillText("타겟: 올로스테릭 부위 [X]", 260, 110);
+                }
             }
 
             if(games.ez.active) {
                 ezTimer++;
                 if(ezTimer > 50) {
-                    subBalls.push({x: 700, y: 175 + (Math.random()*80-40), speed: 3.5 + Math.random()*2});
+                    subBalls.push({x: 700, y: 175 + (Math.random()*60-30), speed: 4.0});
                     ezTimer = 0;
                 }
             }
@@ -501,27 +517,32 @@
             for(let i = subBalls.length-1; i >= 0; i--) {
                 let ball = subBalls[i];
                 if(games.ez.active) ball.x -= ball.speed;
-                
-                ezCtx.fillStyle = "#63b3ed";
-                ezCtx.beginPath(); ezCtx.arc(ball.x, ball.y, 12, 0, Math.PI*2); ezCtx.fill();
+                ezCtx.fillStyle = "#63b3ed"; ezCtx.beginPath(); ezCtx.arc(ball.x, ball.y, 12, 0, Math.PI*2); ezCtx.fill();
 
-                if(ball.x < 390) {
-                    if(ezBlockedTimer > 0) {
-                        subBalls.splice(i, 1);
-                        addScore(10);
-                    } else {
-                        subBalls.splice(i, 1);
-                        triggerDamage('ez', 15);
-                        addScore(-5);
+                if(ball.x < 400) {
+                    if(ezBlockedTimer > 0) { // 방어 성공
+                        subBalls.splice(i, 1); addScore(10);
+                    } else { // 뚫림
+                        subBalls.splice(i, 1); triggerDamage('ez', 15); addScore(-5);
                     }
                 }
             }
             requestAnimationFrame(ezLoop);
         }
+
         function fireInhibitor(type) {
-            if(!games.ez.active) return;
-            ezBlockedTimer = 120;
-            addScore(5);
+            if(!games.ez.active || ezBlockedTimer > 0) return;
+            
+            // 기작적 일치 여부 완벽 검증 로직
+            if(type === 'comp' && ezState === 'NORMAL') {
+                ezBlockedTimer = 100; addScore(15);
+            } else if(type === 'noncomp' && ezState === 'MUTANT') {
+                ezBlockedTimer = 100; addScore(15);
+            } else {
+                // 🔴 상태 불일치! 약물 튕겨 나감 (페널티)
+                triggerDamage('ez', 10); addScore(-10);
+                // 오처방 알림
+            }
         }
         ezLoop();
 
@@ -546,9 +567,7 @@
         // ☣️ 4. 종합 방어 (Total War)
         // ==========================================
         const warCtx = document.getElementById('warCanvas').getContext('2d');
-        let selectedWeapon = 1;
-        let enemies = [];
-        let wTimer = 0;
+        let selectedWeapon = 1, enemies = [], wTimer = 0;
         const eMeta = {
             1: { c: "#e53e3e", n: "mRNA", r: 18 }, 2: { c: "#ecc94b", n: "Mutant", r: 18 },
             3: { c: "#38a169", n: "Enzyme", r: 22 }, 4: { c: "#9f7aea", n: "Toxin", r: 15 }
@@ -563,11 +582,9 @@
 
         function warLoop() {
             warCtx.clearRect(0, 0, 700, 400);
-            
             if(games.war.errorFlash > 0) {
                 warCtx.fillStyle = `rgba(229, 62, 62, ${games.war.errorFlash/20})`;
-                warCtx.fillRect(0,0,700,400);
-                games.war.errorFlash--;
+                warCtx.fillRect(0,0,700,400); games.war.errorFlash--;
             }
 
             warCtx.fillStyle = "#e53e3e"; warCtx.beginPath(); warCtx.arc(350, 200, 30, 0, Math.PI*2); warCtx.fill();
@@ -592,10 +609,7 @@
                 warCtx.fillStyle = m.c; warCtx.beginPath(); warCtx.arc(e.x, e.y, m.r, 0, Math.PI*2); warCtx.fill();
                 warCtx.fillStyle = "white"; warCtx.font = "bold 11px Segoe UI"; warCtx.fillText(m.n, e.x-13, e.y+4);
 
-                if(Math.hypot(350 - e.x, 200 - e.y) < 40) {
-                    enemies.splice(i, 1);
-                    triggerDamage('war', 12);
-                }
+                if(Math.hypot(350 - e.x, 200 - e.y) < 40) { enemies.splice(i, 1); triggerDamage('war', 12); }
             }
             requestAnimationFrame(warLoop);
         }
@@ -610,11 +624,8 @@
                 let enemy = enemies[i];
                 if(Math.hypot(mX - enemy.x, mY - enemy.y) < eMeta[enemy.type].r + 10) {
                     hitAny = true;
-                    if(enemy.type === selectedWeapon) {
-                        enemies.splice(i, 1); addScore(20);
-                    } else {
-                        triggerDamage('war', 10); addScore(-10);
-                    }
+                    if(enemy.type === selectedWeapon) { enemies.splice(i, 1); addScore(20); } 
+                    else { triggerDamage('war', 10); addScore(-10); }
                     break;
                 }
             }
