@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Cure: Targeted Therapy</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --secondary: #4a5568;
+            --accent: #e53e3e;
+            --success: #38a169;
+            --bg: #f7fafc;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            color: #2d3748;
+            display: flex;
+        }
+        /* 사이드바 */
+        .sidebar {
+            width: 250px;
+            background-color: #1a202c;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            position: fixed;
+        }
+        .sidebar h2 { margin-top: 0; color: #63b3ed; }
+        .menu-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #2d3748;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .menu-btn:hover, .menu-btn.active { background: var(--primary); }
+        .score-board { margin-top: 30px; padding-top: 20px; border-top: 1px solid #4a5568; }
+        
+        /* 메인 콘텐츠 */
+        .main-content {
+            margin-left: 250px;
+            padding: 40px;
+            width: calc(100% - 250px);
+            box-sizing: border-box;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* 카드 및 탭 디자인 */
+        .card-grid { display: flex; gap: 20px; margin-top: 20px; }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex: 1;
+            border-top: 4px solid var(--primary);
+        }
+        .card.rna { border-color: var(--primary); }
+        .card.enzyme { border-color: var(--success); }
+        .card.war { border-color: var(--accent); }
+        
+        .tab-container { margin-top: 20px; }
+        .tab-buttons { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .tab-btn {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); margin-bottom: -2px; }
+        .tab-content { display: none; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .tab-content.active { display: block; }
+
+        /* 게임 요소 디자인 */
+        input[type="text"] { padding: 10px; font-size: 16px; width: 300px; border: 2px solid #cbd5e0; border-radius: 6px; text-transform: uppercase; }
+        button.action-btn { padding: 10px 20px; font-size: 16px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button.action-btn:hover { background: #2c5282; }
+        .progress-bar { width: 100%; background: #e2e8f0; border-radius: 8px; height: 20px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: var(--success); transition: width 0.3s; }
+        
+        .crisis-box { background: #fed7d7; border: 1px solid #feb2b2; padding: 15px; border-radius: 8px; color: #9b2c2c; margin-bottom: 20px; font-weight: bold; }
+        .weapon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .weapon-btn { padding: 20px; font-size: 16px; font-weight: bold; border-radius: 8px; border: 2px solid #e2e8f0; background: white; cursor: pointer; transition: 0.2s; }
+        .weapon-btn:hover { border-color: var(--primary); background: #ebf8ff; }
+        
+        .exon-box { display: inline-block; padding: 15px; margin: 5px; border-radius: 6px; font-weight: bold; text-align: center; }
+        .exon-normal { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        .exon-error { background: #fed7d7; color: #c53030; border: 1px solid #feb2b2; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>🏥 Project Cure</h2>
+        <p style="color: #a0aec0; font-size: 13px;">표적 치료 시뮬레이터</p>
+        <hr style="border-color: #4a5568;">
+        <button class="menu-btn active" onclick="showSection('home')">[홈] 대시보드</button>
+        <button class="menu-btn" onclick="showSection('rna')">🧬 RNA 치료 센터</button>
+        <button class="menu-btn" onclick="showSection('enzyme')">🧪 효소 치료 센터</button>
+        <button class="menu-btn" onclick="showSection('war')">☣️ 종합 치료 (War)</button>
+        <div class="score-board">
+            <div style="font-size: 12px; color: #a0aec0;">누적 연구 점수</div>
+            <div id="scoreDisplay" style="font-size: 24px; font-weight: bold; color: #63b3ed;">0 점</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="home" class="section active">
+            <h1>의생명공학 정밀 타격 시뮬레이션 플랫폼</h1>
+            <p>현대 의학의 핵심인 <b>사후 억제(효소 저해)</b>와 <b>원천 차단(RNA 간섭)</b> 메커니즘을 체험하는 시뮬레이션입니다.</p>
+            <div class="card-grid">
+                <div class="card rna">
+                    <h3 style="color: var(--primary);">🧬 RNA 치료</h3>
+                    <p><b>유전자 설계도의 정밀 타격</b></p>
+                    <p style="font-size: 14px; color: #718096;">질병 단백질이 번역되기 전, mRNA 설계도를 파괴하거나 결함을 수선합니다.</p>
+                    <span style="font-size: 12px; color: #a0aec0;">대표 약물: 파티시란, 스핀라자</span>
+                </div>
+                <div class="card enzyme">
+                    <h3 style="color: var(--success);">🧪 효소 치료</h3>
+                    <p><b>단백질 활성 제어 및 정화</b></p>
+                    <p style="font-size: 14px; color: #718096;">과활성된 효소 구조의 포켓을 막거나, 부족한 효소를 투입하여 대사 노폐물을 분해합니다.</p>
+                    <span style="font-size: 12px; color: #a0aec0;">대표 약물: 리피토, 네비라핀, 아스파라기나아제</span>
+                </div>
+                <div class="card war">
+                    <h3 style="color: var(--accent);">☣️ 종합적 치료</h3>
+                    <p><b>복합 질환 디펜스 모드</b></p>
+                    <p style="font-size: 14px; color: #718096;">모든 질병 상황이 동시다발적으로 발생합니다. 실시간으로 치료 무기를 교체하며 방어하세요.</p>
+                    <span style="font-size: 12px; color: #a0aec0;">요구 역량: 메커니즘 판단력 및 순발력</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="rna" class="section">
+            <h1>🧬 RNA 치료 센터</h1>
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showTab('rna', 'sirna')">🎯 siRNA 스나이퍼</button>
+                    <button class="tab-btn" onclick="showTab('rna', 'aso')">✂️ ASO 에디터</button>
+                </div>
+                
+                <div id="sirna" class="tab-content active">
+                    <h3>🎯 타겟: 간성 트랜스티레틴(TTR) 독성 mRNA 파괴</h3>
+                    <p>RISC 복합체를 가동하기 위해 타겟 mRNA의 <b>상보적 염기서열</b>을 정확히 입력하세요.</p>
+                    <div style="background: #edf2f7; padding: 15px; border-radius: 6px; font-size: 20px; letter-spacing: 3px; margin: 20px 0;">
+                        내려오는 타겟 mRNA: <b id="targetMrna" style="color: #c53030;">AUGGCC</b>
+                    </div>
+                    <input type="text" id="sirnaInput" placeholder="상보 서열 입력 (예: UACCGG)" maxlength="6">
+                    <button class="action-btn" onclick="fireSirna()">🚀 발사 (RISC 유도)</button>
+                    <p id="sirnaResult" style="font-weight: bold; margin-top: 15px;"></p>
+                </div>
+
+                <div id="aso" class="tab-content">
+                    <h3>✂️ 타겟: SMN2 pre-mRNA 스플라이싱 수선</h3>
+                    <p>오류가 발생한 돌연변이 구간을 찾아 ASO 패치를 정확한 좌표에 붙이세요.</p>
+                    <div id="exonContainer" style="margin: 20px 0;">
+                        <div class="exon-box exon-normal">구역 1<br>정상 Exon 6</div>
+                        <div class="exon-box exon-normal">구역 2<br>정상 Exon 7</div>
+                        <div class="exon-box exon-error">구역 3<br>오류 Exon 7b ⚠️</div>
+                        <div class="exon-box exon-normal">구역 4<br>정상 Exon 8</div>
+                    </div>
+                    <p><b>ASO 패치를 부착할 구역을 선택하세요:</b></p>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="action-btn" style="background: #4a5568;" onclick="applyPatch(1)">구역 1</button>
+                        <button class="action-btn" style="background: #4a5568;" onclick="applyPatch(2)">구역 2</button>
+                        <button class="action-btn" style="background: #4a5568;" onclick="applyPatch(3)">구역 3</button>
+                        <button class="action-btn" style="background: #4a5568;" onclick="applyPatch(4)">구역 4</button>
+                    </div>
+                    <p id="asoResult" style="font-weight: bold; margin-top: 15px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="enzyme" class="section">
+            <h1>🧪 효소 치료 센터</h1>
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showTab('enzyme', 'kinetics')">🧩 효소 저해제 퍼즐</button>
+                    <button class="tab-btn" onclick="showTab('enzyme', 'addition')">🧹 효소 추가 투입</button>
+                </div>
+                
+                <div id="kinetics" class="tab-content active">
+                    <h3>🧩 효소 활성 부위 및 올로스테릭 부위 공략 시뮬레이터</h3>
+                    <div style="display: flex; gap: 30px;">
+                        <div style="flex: 1;">
+                            <label><b>약물 기전 선택 (도킹 포켓):</b></label><br>
+                            <select id="inhibitorType" style="padding: 8px; width: 100%; margin: 10px 0 20px 0; font-size: 15px;" onchange="updateChart()">
+                                <option value="comp">경쟁적 저해제 (활성 부위 도킹 - 리피토)</option>
+                                <option value="noncomp">비경쟁적 저해제 (올로스테릭 도킹 - 네비라핀)</option>
+                            </select>
+                            
+                            <label><b>저해제 투여 농도 [I]: </b><span id="concVal">1.0</span></label><br>
+                            <input type="range" id="inhibitorConc" min="0" max="5" step="0.5" value="1" style="width: 100%; margin: 10px 0 20px 0;" oninput="updateChart()">
+                            
+                            <div style="background: #f7fafc; padding: 15px; border-radius: 6px; border-left: 4px solid var(--primary); font-size: 14px;">
+                                <p style="margin-top:0;"><b>💡 메커니즘 해설</b></p>
+                                <p id="mechDesc">경쟁적 저해제는 기질과 직접 경쟁하므로 겉보기 <b>K_m이 증가</b>하여 그래프가 오른쪽으로 밀립니다.</p>
+                            </div>
+                            <button class="action-btn" style="margin-top: 20px; width: 100%;" onclick="dockInhibitor()">🔗 약물 도킹 확정 (+15점)</button>
+                        </div>
+                        <div style="flex: 2;">
+                            <canvas id="mmChart" width="400" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="addition" class="tab-content">
+                    <h3>🧹 백혈병 세포 영양분 고갈 작전 (아스파라기나아제 투여)</h3>
+                    <p>혈액 내 축적된 독성 아스파라긴 수치를 낮추어 종양 세포를 굶겨 죽이세요.</p>
+                    <h2 style="margin-bottom: 5px;">현재 아스파라긴 농도: <span id="toxinLevel" style="color: #d69e2e;">50</span> mmol/L</h2>
+                    <div class="progress-bar">
+                        <div id="toxinFill" class="progress-fill" style="width: 50%; background: #d69e2e;"></div>
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 15px;">
+                        <button class="action-btn" onclick="injectEnzyme()">💉 아스파라기나아제 투여 (-15)</button>
+                        <button class="action-btn" style="background: var(--secondary);" onclick="simulateMetabolism()">⏳ 대사 진행 (+20)</button>
+                    </div>
+                    <p id="additionResult" style="font-weight: bold; margin-top: 15px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="war" class="section">
+            <h1>☣️ 종합 치료: 긴급 임상 방어 작전</h1>
+            <p>환자의 생명력이 실시간으로 소모됩니다. 돌발 질병 상황을 파악하고 알맞은 무기를 클릭해 방어하세요.</p>
+            
+            <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+                <div style="flex: 1; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <h3 style="margin: 0 0 10px 0;">환자 잔여 생명력: <span id="hpVal" style="color: var(--accent);">100</span>%</h3>
+                    <div class="progress-bar" style="margin:0;">
+                        <div id="hpFill" class="progress-fill" style="width: 100%; background: var(--accent);"></div>
+                    </div>
+                </div>
+                <button class="action-btn" id="warStartBtn" onclick="startTotalWar()">⚔️ 시뮬레이션 시작</button>
+            </div>
+
+            <div id="crisisBox" class="crisis-box" style="display: none;">
+                <div id="crisisTitle" style="font-size: 18px;">⚠️ [긴급 경보] 시스템 대기중...</div>
+                <div id="crisisDesc" style="font-size: 14px; font-weight: normal; margin-top: 5px;">시뮬레이션 시작 버튼을 눌러주세요.</div>
+            </div>
+
+            <h3>🛠️ 실시간 무기 교체 시스템</h3>
+            <div class="weapon-grid">
+                <button class="weapon-btn" onclick="useWeapon(1)">1️⃣ siRNA 스나이퍼<br><span style="font-size:12px; color:#718096;">(mRNA 타격)</span></button>
+                <button class="weapon-btn" onclick="useWeapon(2)">2️⃣ ASO 에디터<br><span style="font-size:12px; color:#718096;">(스플라이싱 교정)</span></button>
+                <button class="weapon-btn" onclick="useWeapon(3)">3️⃣ 효소 저해제<br><span style="font-size:12px; color:#718096;">(포켓 도킹 차단)</span></button>
+                <button class="weapon-btn" onclick="useWeapon(4)">4️⃣ 추가 효소<br><span style="font-size:12px; color:#718096;">(독성물 분해)</span></button>
+            </div>
+            <p id="warResult" style="font-weight: bold; margin-top: 15px; text-align: center; font-size: 18px;"></p>
+        </div>
+
+    </div>
+
+    <script>
+        // 전역 상태 변수
+        let score = 0;
+        let currentSection = 'home';
+        
+        // -----------------------------------------
+        // 0. 공통 네비게이션 로직
+        // -----------------------------------------
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+            currentSection = id;
+            if (id === 'enzyme') updateChart();
+        }
+
+        function showTab(sectionId, tabId) {
+            const container = document.getElementById(sectionId);
+            container.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function addScore(pts) {
+            score += pts;
+            document.getElementById('scoreDisplay').innerText = score + " 점";
+        }
+
+        // -----------------------------------------
+        // 1. siRNA 스나이퍼 로직
+        // -----------------------------------------
+        let currentMrna = "AUGGCC";
+        const compMap = {'A':'U', 'U':'A', 'G':'C', 'C':'G'};
+        
+        function genMrna() {
+            const bases = ['A','U','G','C'];
+            let seq = "";
+            for(let i=0; i<6; i++) seq += bases[Math.floor(Math.random()*4)];
+            currentMrna = seq;
+            document.getElementById('targetMrna').innerText = currentMrna;
+            document.getElementById('sirnaInput').value = "";
+        }
+
+        function fireSirna() {
+            let answer = "";
+            for(let char of currentMrna) answer += compMap[char];
+            const input = document.getElementById('sirnaInput').value.toUpperCase();
+            const res = document.getElementById('sirnaResult');
+            
+            if(input === answer) {
+                res.style.color = "green";
+                res.innerText = "🎯 명중! RISC 복합체가 mRNA를 성공적으로 절단했습니다. (+20점)";
+                addScore(20);
+                setTimeout(genMrna, 1200);
+            } else {
+                res.style.color = "red";
+                res.innerText = `오조준! 올바른 상보 서열은 ${answer} 입니다.`;
+                setTimeout(genMrna, 1500);
+            }
+        }
+
+        // -----------------------------------------
+        // 2. ASO 에디터 로직
+        // -----------------------------------------
+        function applyPatch(zone) {
+            const res = document.getElementById('asoResult');
+            if(zone === 3) {
+                res.style.color = "green";
+                res.innerText = "✨ 수선 완료! 돌연변이 엑손이 제외되고 정상 단백질이 번역됩니다. (+30점)";
+                addScore(30);
+            } else {
+                res.style.color = "red";
+                res.innerText = "잘못된 구역에 패치를 붙였습니다. 스플라이싱 수선 실패!";
+            }
+        }
+
+        // -----------------------------------------
+        // 3. 효소 저해제 퍼즐 로직 (Chart.js)
+        // -----------------------------------------
+        let mmChart = null;
+
+        function updateChart() {
+            const type = document.getElementById('inhibitorType').value;
+            const conc = parseFloat(document.getElementById('inhibitorConc').value);
+            document.getElementById('concVal').innerText = conc.toFixed(1);
+            
+            const desc = document.getElementById('mechDesc');
+            if(type === 'comp') {
+                desc.innerHTML = "경쟁적 저해제는 기질과 직접 경쟁하므로 겉보기 <b>K_m이 증가</b>하여 그래프가 오른쪽으로 밀립니다. (리피토 모델)";
+            } else {
+                desc.innerHTML = "올로스테릭 부위에 결합해 입체 구조를 찌그러뜨리므로 <b>V_max가 감소</b>합니다. (네비라핀 모델)";
+            }
+
+            // 동역학 계산
+            const S = [];
+            const vNormal = [];
+            const vInhibited = [];
+            const Vmax = 10;
+            const Km = 2;
+
+            let VmaxApp = Vmax;
+            let KmApp = Km;
+            if(type === 'comp') KmApp = Km * (1 + conc);
+            else VmaxApp = Vmax / (1 + conc);
+
+            for(let i=0; i<=10; i+=0.5) {
+                S.push(i);
+                vNormal.push((Vmax * i) / (Km + i));
+                vInhibited.push((VmaxApp * i) / (KmApp + i));
+            }
+
+            if(mmChart) mmChart.destroy();
+            const ctx = document.getElementById('mmChart').getContext('2d');
+            mmChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: S,
+                    datasets: [
+                        { label: '정상 효소 (Normal)', data: vNormal, borderColor: '#3182ce', borderDash: [5,5], fill: false, tension: 0.2 },
+                        { label: '저해제 투여 (Inhibited)', data: vInhibited, borderColor: '#e53e3e', borderWidth: 3, fill: false, tension: 0.2 }
+                    ]
+                },
+                options: {
+                    responsive: false,
+                    scales: {
+                        x: { title: { display: true, text: '기질 농도 [S]' } },
+                        y: { title: { display: true, text: '반응 속도 (v)' }, min: 0, max: 12 }
+                    }
+                }
+            });
+        }
+
+        function dockInhibitor() {
+            addScore(15);
+            alert("🔗 약물 도킹 확정! 표적 효소의 활성이 제어되었습니다. (+15점)");
+        }
+
+        // -----------------------------------------
+        // 4. 효소 추가 투입 로직
+        // -----------------------------------------
+        let toxin = 50;
+        function updateToxinUI() {
+            document.getElementById('toxinLevel').innerText = toxin;
+            document.getElementById('toxinFill').style.width = toxin + "%";
+            const res = document.getElementById('additionResult');
+            if(toxin === 0) {
+                res.style.color = "green";
+                res.innerText = "🎉 완벽한 대사 정화! 백혈병 세포가 아스파라긴 고갈로 사멸했습니다.";
+            } else {
+                res.innerText = "";
+            }
+        }
+        function injectEnzyme() {
+            toxin = Math.max(0, toxin - 15);
+            addScore(10);
+            updateToxinUI();
+        }
+        function simulateMetabolism() {
+            toxin = Math.min(100, toxin + 20);
+            updateToxinUI();
+        }
+
+        // -----------------------------------------
+        // 5. 종합 치료 (Total War) 디펜스 로직
+        // -----------------------------------------
+        let warInterval = null;
+        let hp = 100;
+        let currentCrisis = null;
+        const crisisList = [
+            { id: 1, name: "과다 mRNA 변이 생성", weapon: 1, desc: "간에서 독성 단백질 설계도가 쏟아져 나옵니다. (siRNA 필요)" },
+            { id: 2, name: "pre-mRNA 스플라이싱 탈선", weapon: 2, desc: "중요한 엑손이 빠진 불량 설계도가 결합 중입니다. (ASO 필요)" },
+            { id: 3, name: "질병 효소 100% 과활성", weapon: 3, desc: "타겟 효소의 포켓이 활짝 열려 대사를 파괴합니다. (저해제 필요)" },
+            { id: 4, name: "혈액 내 종양 영양분 포화", weapon: 4, desc: "아스파라긴 수치가 급증하여 종양이 증식합니다. (추가효소 필요)" }
+        ];
+
+        function startTotalWar() {
+            document.getElementById('warStartBtn').style.display = "none";
+            document.getElementById('crisisBox').style.display = "block";
+            hp = 100;
+            updateWarUI();
+            nextCrisis();
+            if(warInterval) clearInterval(warInterval);
+            warInterval = setInterval(() => {
+                hp = Math.max(0, hp - 4);
+                updateWarUI();
+                if(hp === 0) {
+                    clearInterval(warInterval);
+                    document.getElementById('crisisTitle').innerText = "💀 시뮬레이션 종료";
+                    document.getElementById('crisisDesc').innerText = "환자의 생명력이 0이 되었습니다. 다시 시작해주세요.";
+                    document.getElementById('warStartBtn').style.display = "block";
+                    document.getElementById('warStartBtn').innerText = "🔄 다시 시작";
+                }
+            }, 1000);
+        }
+
+        function updateWarUI() {
+            document.getElementById('hpVal').innerText = hp;
+            document.getElementById('hpFill').style.width = hp + "%";
+        }
+
+        function nextCrisis() {
+            currentCrisis = crisisList[Math.floor(Math.random() * crisisList.length)];
+            document.getElementById('crisisTitle').innerText = "⚠️ [긴급 경보] " + currentCrisis.name;
+            document.getElementById('crisisDesc').innerText = currentCrisis.desc;
+        }
+
+        function useWeapon(wId) {
+            if(!currentCrisis || hp === 0) return;
+            const res = document.getElementById('warResult');
+            if(wId === currentCrisis.weapon) {
+                res.style.color = "green";
+                res.innerText = "🟢 정확한 처방입니다! 위기 극복 (+50점)";
+                addScore(50);
+                hp = Math.min(100, hp + 10);
+                updateWarUI();
+                nextCrisis();
+            } else {
+                res.style.color = "red";
+                res.innerText = "🔴 오처방! 잘못된 무기입니다. 체력 감소!";
+                hp = Math.max(0, hp - 12);
+                updateWarUI();
+            }
+            setTimeout(() => { res.innerText = ""; }, 1500);
+        }
+
+        // 초기화
+        genMrna();
+    </script>
+</body>
+</html>
