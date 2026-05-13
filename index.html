@@ -17,22 +17,12 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            overflow-x: hidden;
-            user-select: none;
+            margin: 0; background-color: var(--bg); color: var(--text);
+            display: flex; overflow-x: hidden; user-select: none;
         }
         .sidebar {
-            width: 250px;
-            background-color: #11141b;
-            border-right: 1px solid #2d3748;
-            height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-            position: fixed;
-            z-index: 100;
+            width: 250px; background-color: #11141b; border-right: 1px solid #2d3748;
+            height: 100vh; padding: 20px; box-sizing: border-box; position: fixed; z-index: 100;
         }
         .sidebar h2 { margin-top: 0; color: #63b3ed; }
         .menu-btn {
@@ -45,8 +35,7 @@
         .score-board { margin-top: 30px; padding-top: 20px; border-top: 1px solid #2d3748; text-align: center; }
         
         .main-content { margin-left: 250px; padding: 30px 40px; width: calc(100% - 250px); box-sizing: border-box; }
-        .section { display: none; }
-        .section.active { display: block; }
+        .section { display: none; } .section.active { display: block; }
         
         .tab-buttons { display: flex; border-bottom: 2px solid #2d3748; margin-bottom: 20px; gap: 10px; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: var(--panel-bg); color: #a0aec0; border-radius: 8px 8px 0 0; font-size: 16px; font-weight: bold; }
@@ -63,7 +52,7 @@
         
         button.action-btn { padding: 10px 20px; font-size: 16px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button.action-btn:hover { background: #2b6cb0; }
-        .start-overlay { position: absolute; width: 700px; height: 350px; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 8px; z-index: 10; }
+        .start-overlay { position: absolute; width: 700px; height: 350px; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 8px; z-index: 10; }
         
         .weapon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px; }
         .weapon-btn { padding: 15px; font-size: 15px; font-weight: bold; border-radius: 8px; border: 2px solid #4a5568; background: var(--panel-bg); color: white; cursor: pointer; transition: 0.2s; }
@@ -131,7 +120,7 @@
                 <div style="position:relative; width:700px; margin:0 auto;">
                     <div id="asoOverlay" class="start-overlay" style="height:200px;">
                         <h2 style="color:white; margin-bottom:10px;">SMN2 스플라이싱 실시간 수선</h2>
-                        <p style="color:#a0aec0; margin-bottom:20px;">붉은색 돌연변이 엑손이 중앙에 올 때만 [Spacebar] 입력</p>
+                        <p style="color:#a0aec0; margin-bottom:20px;">붉은색 돌연변이 엑손이 중앙에 올 때만 [Spacebar] 쾌속 입력</p>
                         <button class="action-btn" onclick="startMiniGame('aso')">▶️ 작전 시작</button>
                     </div>
                     <canvas id="asoCanvas" width="700" height="200"></canvas>
@@ -212,7 +201,6 @@
         let score = 0;
         const compMap = {'A':'U', 'U':'A', 'G':'C', 'C':'G'};
         
-        // 전역 게임 상태 관리
         const games = {
             sirna: { active: false, timer: 60, hp: 100, interval: null, errorFlash: 0 },
             aso:   { active: false, timer: 60, hp: 100, interval: null, errorFlash: 0 },
@@ -228,9 +216,8 @@
         function triggerDamage(gName, amount) {
             if(!games[gName].active) return;
             games[gName].hp = Math.max(0, games[gName].hp - amount);
-            games[gName].errorFlash = 12; // 화면 번쩍임 효과
+            games[gName].errorFlash = 12;
             
-            // HP 바 색상 변환
             const fill = document.getElementById(gName + 'HpBar');
             fill.style.width = games[gName].hp + "%";
             if(games[gName].hp < 40) fill.style.background = "var(--accent)";
@@ -243,13 +230,12 @@
             document.getElementById(gName + 'Overlay').style.display = "none";
             games[gName].active = true;
             games[gName].hp = 100;
-            triggerDamage(gName, 0); // UI 리셋
+            triggerDamage(gName, 0);
             
             if(gName === 'war') games[gName].timer = 0;
             else games[gName].timer = 60;
 
-            // 기존 적 초기화
-            if(gName==='sirna') { bossLetters=[]; lasers=[]; playerX=350; }
+            if(gName==='sirna') { bossLetters=[]; lasers=[]; playerX=350; bossX=350; bossSpeed=2.5; }
             if(gName==='aso')   { conveyorItems=[]; }
             if(gName==='ez')    { subBalls=[]; ezBlockedTimer=0; }
             if(gName==='war')   { enemies=[]; }
@@ -257,7 +243,6 @@
             if(games[gName].interval) clearInterval(games[gName].interval);
             games[gName].interval = setInterval(() => {
                 if(!games[gName].active) return;
-                
                 if(gName === 'war') {
                     games[gName].timer++;
                     document.getElementById('warTime').innerText = games[gName].timer;
@@ -287,7 +272,6 @@
             }
         }
 
-        // 네비게이션 제어
         let currentTab = 'home';
         function showSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -306,28 +290,24 @@
         }
 
         // ==========================================
-        // 🎯 1. siRNA 스나이퍼 (Space Invaders 류)
+        // 🎯 1. siRNA 스나이퍼 (공격 속도 완화 버전)
         // ==========================================
         const sirnaCtx = document.getElementById('sirnaCanvas').getContext('2d');
         let playerX = 350;
-        let bossX = 350, bossSpeed = 4;
+        let bossX = 350, bossSpeed = 2.5; // 패치: 보스 이동 속도 감소 (4 -> 2.5)
         let bossLetters = [];
         let lasers = [];
         let sSpawnTimer = 0;
         let pKeys = {};
 
-        // 방향키 및 염기 직접 타이핑 감지
         window.addEventListener('keydown', e => {
             pKeys[e.code] = true;
-            // 스크롤 방지
             if(['ArrowLeft','ArrowRight','Space'].includes(e.code) && currentTab !== 'home') e.preventDefault();
-            
             if(!games.sirna.active) return;
             
-            // A, U, G, C 직접 타이핑 시 해당 염기 레이저 즉시 발사
             const keyChar = e.key.toUpperCase();
             if(['A','U','G','C'].includes(keyChar)) {
-                lasers.push({x: playerX, y: 320, speed: 10, comp: keyChar, isHit: false});
+                lasers.push({x: playerX, y: 320, speed: 10, comp: keyChar});
             }
         });
         window.addEventListener('keyup', e => { pKeys[e.code] = false; });
@@ -335,13 +315,11 @@
         function sirnaLoop() {
             sirnaCtx.clearRect(0, 0, 700, 350);
             
-            // 플레이어 부드러운 좌우 이동 컨트롤
             if(games.sirna.active) {
                 if(pKeys['ArrowLeft']) playerX = Math.max(30, playerX - 7);
                 if(pKeys['ArrowRight']) playerX = Math.min(670, playerX + 7);
             }
 
-            // 피격 번쩍임 효과 (모든 캔버스 공통 로직 적용 가능)
             if(games.sirna.errorFlash > 0) {
                 sirnaCtx.fillStyle = `rgba(229, 62, 62, ${games.sirna.errorFlash/20})`;
                 sirnaCtx.fillRect(0,0,700,350);
@@ -349,24 +327,22 @@
             }
 
             if(games.sirna.active) {
-                // 보스 랜덤 이동 및 다방향 미사일 투척
                 bossX += bossSpeed;
                 if(bossX < 50 || bossX > 650) bossSpeed *= -1;
-                if(Math.random() < 0.03) bossSpeed = (Math.random()*6 + 2) * Math.sign(bossSpeed);
                 
                 sirnaCtx.fillStyle = "#e53e3e";
                 sirnaCtx.beginPath(); sirnaCtx.arc(bossX, 40, 25, 0, Math.PI*2); sirnaCtx.fill();
                 sirnaCtx.fillStyle = "white"; sirnaCtx.font = "bold 12px Segoe UI"; sirnaCtx.fillText("BOSS", bossX-15, 44);
 
                 sSpawnTimer++;
-                if(sSpawnTimer > 45) { // 여러 군데에서 쏟아지도록 보스 위치에서 투하
+                if(sSpawnTimer > 65) { // 패치: 스폰 주기 완화 (45 -> 65 프레임)
                     const bases = ['A','U','G','C'];
-                    bossLetters.push({x: bossX + (Math.random()*40-20), y: 65, char: bases[Math.floor(Math.random()*4)], speed: 1.5 + Math.random()*1.5});
+                    // 패치: 하강 속도 대폭 감소 (0.8 ~ 1.5)
+                    bossLetters.push({x: bossX + (Math.random()*40-20), y: 65, char: bases[Math.floor(Math.random()*4)], speed: 0.8 + Math.random()*0.7});
                     sSpawnTimer = 0;
                 }
             }
 
-            // 미사일 렌더링
             for(let i = bossLetters.length-1; i >= 0; i--) {
                 let l = bossLetters[i];
                 if(games.sirna.active) l.y += l.speed;
@@ -375,7 +351,6 @@
                 sirnaCtx.beginPath(); sirnaCtx.arc(l.x, l.y, 18, 0, Math.PI*2); sirnaCtx.fill();
                 sirnaCtx.fillStyle = "white"; sirnaCtx.font = "bold 16px Segoe UI"; sirnaCtx.fillText(l.char, l.x-6, l.y+6);
 
-                // 바닥 침투 페널티
                 if(l.y > 330 && games.sirna.active) {
                     bossLetters.splice(i, 1);
                     triggerDamage('sirna', 10);
@@ -383,7 +358,6 @@
                 }
             }
 
-            // 레이저 렌더링 및 정밀 충돌 판정
             for(let i = lasers.length-1; i >= 0; i--) {
                 let laser = lasers[i];
                 laser.y -= laser.speed;
@@ -395,13 +369,12 @@
                 for(let j = bossLetters.length-1; j >= 0; j--) {
                     let l = bossLetters[j];
                     if(Math.hypot(laser.x - l.x, laser.y - l.y) < 22) {
-                        if(laser.comp === compMap[l.char]) { // 올바른 요격
+                        if(laser.comp === compMap[l.char]) {
                             bossLetters.splice(j, 1);
                             addScore(15);
-                        } else { // 🔴 잘못된 염기로 맞춤 (페널티)
+                        } else {
                             triggerDamage('sirna', 10);
                             addScore(-10);
-                            // 화면에 텍스트 피드백 표시
                         }
                         lasers.splice(i, 1);
                         break;
@@ -410,7 +383,6 @@
                 if(laser && laser.y < 0) lasers.splice(i, 1);
             }
 
-            // 하단 플레이어 포탑 (움직이는 방패 역할)
             sirnaCtx.fillStyle = "#63b3ed";
             sirnaCtx.beginPath();
             sirnaCtx.moveTo(playerX, 310); sirnaCtx.lineTo(playerX-25, 340); sirnaCtx.lineTo(playerX+25, 340);
@@ -421,7 +393,7 @@
         sirnaLoop();
 
         // ==========================================
-        // ✂️ 2. ASO 에디터 (타이밍 페널티 류)
+        // ✂️ 2. ASO 에디터 (쾌속 컨베이어 버전)
         // ==========================================
         const asoCtx = document.getElementById('asoCanvas').getContext('2d');
         let conveyorItems = [];
@@ -436,18 +408,18 @@
                 games.aso.errorFlash--;
             }
 
-            // 스캐너 타겟 존
             asoCtx.strokeStyle = "#ecc94b"; asoCtx.lineWidth = 3;
             asoCtx.strokeRect(310, 40, 80, 120);
             asoCtx.fillStyle = "rgba(236, 201, 75, 0.15)"; asoCtx.fillRect(310, 40, 80, 120);
 
             if(games.aso.active) {
                 asoTimer++;
-                if(asoTimer > 80) {
+                if(asoTimer > 45) { // 패치: 속도가 빨라진 만큼 스폰 간격 최적화 (80 -> 45)
                     const isErr = Math.random() < 0.45;
                     conveyorItems.push({
-                        x: 0, y: 80, speed: 3.5, isError: isErr,
-                        text: isErr ? "Mutant 7b" : "Normal Exon"
+                        x: 0, y: 80, 
+                        speed: 6.0, // 패치: 엑손 이동 속도 대폭 상향 (3.5 -> 6.0)
+                        isError: isErr, text: isErr ? "Mutant 7b" : "Normal Exon"
                     });
                     asoTimer = 0;
                 }
@@ -461,9 +433,8 @@
                 asoCtx.fillRect(item.x, item.y, 80, 40);
                 asoCtx.fillStyle = "white"; asoCtx.font = "bold 12px Segoe UI"; asoCtx.fillText(item.text, item.x+6, item.y+25);
 
-                // 놓치고 지나갈 경우 페널티
                 if(item.x > 700) {
-                    if(item.isError && games.aso.active) { // 돌연변이를 안 자르고 보냄
+                    if(item.isError && games.aso.active) {
                         triggerDamage('aso', 15);
                         addScore(-10);
                     }
@@ -473,27 +444,24 @@
             requestAnimationFrame(asoLoop);
         }
         
-        // 스페이스바 판정
         window.addEventListener('keydown', e => {
             if(e.code === 'Space' && games.aso.active) {
                 let hitTarget = false;
                 for(let i = conveyorItems.length-1; i >= 0; i--) {
                     let item = conveyorItems[i];
-                    if(item.x > 250 && item.x < 370) { // 타겟 존 내부
+                    if(item.x > 250 && item.x < 370) {
                         hitTarget = true;
-                        if(item.isError) { // 올바르게 교정
+                        if(item.isError) {
                             conveyorItems.splice(i, 1);
                             addScore(30);
-                        } else { // 🔴 정상 엑손을 잘라버림 (페널티)
+                        } else {
                             triggerDamage('aso', 15);
                             addScore(-15);
                         }
                         break;
                     }
                 }
-                if(!hitTarget) { // 허공에 가위질
-                    triggerDamage('aso', 5);
-                }
+                if(!hitTarget) triggerDamage('aso', 5);
             }
         });
         asoLoop();
@@ -515,7 +483,6 @@
                 games.ez.errorFlash--;
             }
 
-            // 효소 본체
             ezCtx.fillStyle = ezBlockedTimer > 0 ? "#718096" : "#38a169";
             ezCtx.beginPath(); ezCtx.arc(350, 175, 50, 0, Math.PI*2); ezCtx.fill();
             if(ezBlockedTimer > 0) {
@@ -539,10 +506,10 @@
                 ezCtx.beginPath(); ezCtx.arc(ball.x, ball.y, 12, 0, Math.PI*2); ezCtx.fill();
 
                 if(ball.x < 390) {
-                    if(ezBlockedTimer > 0) { // 방어 성공
+                    if(ezBlockedTimer > 0) {
                         subBalls.splice(i, 1);
                         addScore(10);
-                    } else { // 🔴 기질 침투 성공 (페널티)
+                    } else {
                         subBalls.splice(i, 1);
                         triggerDamage('ez', 15);
                         addScore(-5);
@@ -553,12 +520,12 @@
         }
         function fireInhibitor(type) {
             if(!games.ez.active) return;
-            ezBlockedTimer = 120; // 2초간 봉쇄
+            ezBlockedTimer = 120;
             addScore(5);
         }
         ezLoop();
 
-        // 이론 그래프 출력 (Chart.js)
+        // 이론 그래프
         let chartInst = null;
         function drawGraph() {
             const type = document.getElementById('simType').value;
@@ -608,7 +575,7 @@
 
             if(games.war.active) {
                 wTimer++;
-                if(wTimer > Math.max(15, 45 - Math.floor(games.war.timer/3))) { // 시간이 갈수록 스폰 빨라짐
+                if(wTimer > Math.max(15, 45 - Math.floor(games.war.timer/3))) {
                     let ang = Math.random() * Math.PI * 2;
                     enemies.push({ x: 350+Math.cos(ang)*380, y: 200+Math.sin(ang)*380, type: Math.floor(Math.random()*4 + 1), speed: 1.2 + Math.random()*1.5 });
                     wTimer = 0;
@@ -625,7 +592,7 @@
                 warCtx.fillStyle = m.c; warCtx.beginPath(); warCtx.arc(e.x, e.y, m.r, 0, Math.PI*2); warCtx.fill();
                 warCtx.fillStyle = "white"; warCtx.font = "bold 11px Segoe UI"; warCtx.fillText(m.n, e.x-13, e.y+4);
 
-                if(Math.hypot(350 - e.x, 200 - e.y) < 40) { // 코어 도달
+                if(Math.hypot(350 - e.x, 200 - e.y) < 40) {
                     enemies.splice(i, 1);
                     triggerDamage('war', 12);
                 }
@@ -643,15 +610,15 @@
                 let enemy = enemies[i];
                 if(Math.hypot(mX - enemy.x, mY - enemy.y) < eMeta[enemy.type].r + 10) {
                     hitAny = true;
-                    if(enemy.type === selectedWeapon) { // 올바른 무기 타격
+                    if(enemy.type === selectedWeapon) {
                         enemies.splice(i, 1); addScore(20);
-                    } else { // 🔴 잘못된 무기 타격 (페널티)
+                    } else {
                         triggerDamage('war', 10); addScore(-10);
                     }
                     break;
                 }
             }
-            if(!hitAny) triggerDamage('war', 2); // 허공 클릭 페널티
+            if(!hitAny) triggerDamage('war', 2);
         });
         warLoop();
     </script>
